@@ -128,13 +128,10 @@ def image_ocr():
         try:
             import pytesseract
             from PIL import Image
-            # Streamlit Cloud (Linux) 下 apt 安装的 tesseract 在 /usr/bin，显式指定避免 PATH 问题
             import sys
+            # Streamlit Cloud (Linux) 下 apt 安装的 tesseract 在 /usr/bin，显式指定避免 PATH 问题
             if sys.platform == "linux":
-                for p in ("/usr/bin/tesseract", "/usr/local/bin/tesseract"):
-                    if Path(p).exists():
-                        pytesseract.pytesseract.tesseract_cmd = p
-                        break
+                pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
             img = Image.open(uploaded)
             if img.mode != "RGB":
                 img = img.convert("RGB")
@@ -151,7 +148,11 @@ def image_ocr():
         except Exception as e:
             err_msg = str(e).lower()
             if "tesseract" in err_msg or "not found" in err_msg:
-                st.error("未检测到 Tesseract OCR。本地运行请安装 Tesseract；部署到 Streamlit Cloud 时请确保项目根目录有 Aptfile 并包含：tesseract-ocr")
+                st.error(
+                    "未检测到 Tesseract OCR。本地运行请安装 Tesseract。"
+                    "部署到 Streamlit Cloud 时：① 确保仓库根目录有 packages.txt（不是 Aptfile）且含 tesseract-ocr 和 tesseract-ocr-chi-sim；"
+                    "② 在应用设置里点「Clear cache and redeploy」重新部署。"
+                )
             else:
                 st.error(f"OCR 失败：{e}")
 
@@ -216,7 +217,7 @@ def video_to_audio():
                 err = str(e).lower()
                 if "ffmpeg" in err or "ffprobe" in err or "could not find" in err or "no such file" in err:
                     st.error(
-                        "提取失败：未找到 ffmpeg。部署到 Streamlit Cloud 时请确保 Aptfile 包含 ffmpeg，"
+                        "提取失败：未找到 ffmpeg。部署到 Streamlit Cloud 时请确保根目录有 packages.txt 且含 ffmpeg，"
                         "并在应用设置中执行一次「Clear cache and redeploy」。"
                     )
                 else:
@@ -283,7 +284,7 @@ def qr_tools():
                 err = str(e)
                 if "zbar" in err.lower() or "shared library" in err.lower():
                     st.error(
-                        "解析失败：未找到 zbar 库。部署到 Streamlit Cloud 时请确保 Aptfile 包含 libzbar0，"
+                        "解析失败：未找到 zbar 库。部署到 Streamlit Cloud 时请确保根目录有 packages.txt 且含 libzbar0，"
                         "并在应用设置中执行一次「Clear cache and redeploy」。"
                     )
                 else:
