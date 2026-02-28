@@ -3,6 +3,11 @@
 支持：PDF转文本、图片OCR、图片格式转换、视频提取音频、
      Excel转CSV、二维码生成/解析、Base64编解码、文件压缩
 """
+# Streamlit Cloud (Linux) 下 apt 安装的 libzbar 在 /usr/lib/x86_64-linux-gnu，需在导入 pyzbar 前设置
+import os
+_zbar_path = "/usr/lib/x86_64-linux-gnu"
+if os.name == "posix" and os.path.isdir(_zbar_path):
+    os.environ["LD_LIBRARY_PATH"] = _zbar_path + os.pathsep + os.environ.get("LD_LIBRARY_PATH", "")
 
 import io
 import base64
@@ -123,6 +128,13 @@ def image_ocr():
         try:
             import pytesseract
             from PIL import Image
+            # Streamlit Cloud (Linux) 下 apt 安装的 tesseract 在 /usr/bin，显式指定避免 PATH 问题
+            import sys
+            if sys.platform == "linux":
+                for p in ("/usr/bin/tesseract", "/usr/local/bin/tesseract"):
+                    if Path(p).exists():
+                        pytesseract.pytesseract.tesseract_cmd = p
+                        break
             img = Image.open(uploaded)
             if img.mode != "RGB":
                 img = img.convert("RGB")
@@ -201,7 +213,14 @@ def video_to_audio():
                 finally:
                     Path(tmp_path).unlink(missing_ok=True)
             except Exception as e:
-                st.error(f"提取失败：{e}")
+                err = str(e).lower()
+                if "ffmpeg" in err or "ffprobe" in err or "could not find" in err or "no such file" in err:
+                    st.error(
+                        "提取失败：未找到 ffmpeg。部署到 Streamlit Cloud 时请确保 Aptfile 包含 ffmpeg，"
+                        "并在应用设置中执行一次「Clear cache and redeploy」。"
+                    )
+                else:
+                    st.error(f"提取失败：{e}")
 
 
 def excel_to_csv():
@@ -261,7 +280,14 @@ def qr_tools():
                 else:
                     st.warning("未识别到二维码。")
             except Exception as e:
-                st.error(f"解析失败：{e}")
+                err = str(e)
+                if "zbar" in err.lower() or "shared library" in err.lower():
+                    st.error(
+                        "解析失败：未找到 zbar 库。部署到 Streamlit Cloud 时请确保 Aptfile 包含 libzbar0，"
+                        "并在应用设置中执行一次「Clear cache and redeploy」。"
+                    )
+                else:
+                    st.error(f"解析失败：{e}")
 
 
 def base64_tools():
