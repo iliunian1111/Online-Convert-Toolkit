@@ -21,7 +21,7 @@
 ![使用演示](https://你的截图/GIF地址) （用 ScreenToGif 做10秒操作GIF，上传到免费图床如https://imgur.com/）
 
 ## 📦 快速使用
-1. 在线访问：https://你的Streamlit部署地址（后面会说）
+1. 在线访问：https://online-convert-toolkit.streamlit.app/
 2. 上传文件 → 选择转换类型 → 点击转换 → 下载结果
 
 ## 💡 定制开发
