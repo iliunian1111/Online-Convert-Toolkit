@@ -1,5 +1,5 @@
-# 固定到 1.16.x：避免 1.18+ 中 containsMathSyntax 正则导致 iOS Safari/微信 报错 invalid group specifier name
-streamlit>=1.16.0,<1.17.0
+# 使用 1.18.1+：1.18.0 曾导致 Safari/iOS 正则报错，1.18.1 已修复；1.16.x 过旧会在 Streamlit Cloud 报错
+streamlit>=1.18.1
 click>=8.0.0
 PyPDF2>=3.0.0
 pdfplumber>=0.10.0
